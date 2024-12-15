@@ -7,7 +7,7 @@ const upload = multer({ storage: multer.memoryStorage() });
 require('dotenv').config();
 
 const app = express();
-const port = process.env.PORT || 3001;
+const port = process.env.PORT || 3002;
 
 // 配置 AWS
 const s3 = new AWS.S3({
@@ -376,4 +376,5 @@ app.get('/api/images/proxy/:imageId', async (req, res) => {
 
 app.listen(port, () => {
   console.log(`Server running on port ${port}`);
+  console.log('Frontend URL:', 'http://localhost:5174');
 });

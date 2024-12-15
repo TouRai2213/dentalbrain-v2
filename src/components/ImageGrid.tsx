@@ -168,6 +168,9 @@ interface DatabaseImage {
   annotations?: Box[];  // 添加标注字段
 }
 
+// 修改所有API请求的URL
+const API_BASE_URL = 'http://localhost:3002';  // 使用新的后端端口
+
 export function ImageGrid() {
   const [annotations, setAnnotations] = useState<Box[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -209,7 +212,7 @@ export function ImageGrid() {
     try {
       console.log('Fetching images at:', new Date().toISOString());
       console.log('For patient ID:', id);
-      const response = await fetch(`http://localhost:3001/api/patients/${id}/images`);
+      const response = await fetch(`${API_BASE_URL}/api/patients/${id}/images`);
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
@@ -349,7 +352,7 @@ export function ImageGrid() {
           saveFormData.append('image', file);
           saveFormData.append('annotations', JSON.stringify(predictionResult.boxes));
 
-          const saveResponse = await fetch(`http://localhost:3001/api/patients/${id}/images`, {
+          const saveResponse = await fetch(`${API_BASE_URL}/api/patients/${id}/images`, {
             method: 'POST',
             body: saveFormData,
           });
@@ -609,7 +612,7 @@ export function ImageGrid() {
       const blob = await response.blob();
       const file = new File([blob], 'image.jpg', { type: 'image/jpeg' });
 
-      // 发���预测请求
+      // 发预测请求
       const formData = new FormData();
       formData.append('file', file);
       const predictionResponse = await fetch('https://panorama.dentalbrain.app/predict', {
@@ -652,7 +655,7 @@ export function ImageGrid() {
   const handleConfirmDeleteImage = async () => {
     if (deleteImageId) {
       try {
-        const response = await fetch(`http://localhost:3001/api/images/${deleteImageId}`, {
+        const response = await fetch(`${API_BASE_URL}/api/images/${deleteImageId}`, {
           method: 'DELETE'
         });
 
