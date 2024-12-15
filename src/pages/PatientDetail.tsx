@@ -8,6 +8,7 @@ import { ImageGrid } from '../components/ImageGrid';
 import { SubChart } from '../components/patient/SubChart';
 import { useImages } from '../context/ImageContext';
 import { Patient } from '../types/patient';
+import { API_BASE_URL } from '../config/api';
 
 export function PatientDetail() {
   const { id } = useParams<{ id: string }>();
@@ -18,9 +19,9 @@ export function PatientDetail() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchPatient = async () => {
+    const fetchPatientDetails = async () => {
       try {
-        const response = await fetch(`http://localhost:3001/api/patients/${id}`);
+        const response = await fetch(`${API_BASE_URL}/api/patients/${id}`);
         if (!response.ok) {
           throw new Error('Patient not found');
         }
@@ -33,7 +34,7 @@ export function PatientDetail() {
       }
     };
 
-    fetchPatient();
+    fetchPatientDetails();
   }, [id]);
 
   if (loading) {

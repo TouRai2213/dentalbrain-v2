@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { Tag, UserPlus } from 'lucide-react';
 import { NewPatientModal } from '../components/modals/NewPatientModal';
 import { Patient } from '../types/patient';
+import { API_BASE_URL } from '../config/api';
 
 export function Dashboard() {
   const [isNewPatientModalOpen, setIsNewPatientModalOpen] = useState(false);
@@ -15,7 +16,7 @@ export function Dashboard() {
 
   const fetchPatients = async () => {
     try {
-      const response = await fetch('http://localhost:3001/api/patients');
+      const response = await fetch(`${API_BASE_URL}/api/patients`);
       const data = await response.json();
       setPatients(data);
     } catch (error) {
