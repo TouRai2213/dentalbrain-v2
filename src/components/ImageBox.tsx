@@ -125,6 +125,8 @@ export function ImageBox({
     }
   };
 
+  const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3002';
+
   return (
     <div 
       onClick={handleClick}
@@ -158,10 +160,11 @@ export function ImageBox({
               <div className="relative aspect-video w-full">
                 <img
                   ref={imageRef}
-                  src={originalImageUrl}
-                  alt="Uploaded"
+                  src={originalImageUrl?.startsWith('/') ? `${API_BASE_URL}${originalImageUrl}` : originalImageUrl}
+                  alt="Original"
                   className="w-full h-full object-contain"
                   onLoad={handleImageLoad}
+                  style={{ pointerEvents: 'none' }}
                   crossOrigin="anonymous"
                 />
                 <canvas

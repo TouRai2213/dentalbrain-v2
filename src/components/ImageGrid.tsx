@@ -8,6 +8,9 @@ import {
 } from "./ui/dialog";
 import { UniversalNumberingSystem } from './dental/UniversalNumberingSystem';
 import { useParams } from 'react-router-dom';
+import { API_BASE_URL } from '../config/api';
+
+console.log('API Base URL:', API_BASE_URL);
 
 export interface Box {
   corners: number[][];
@@ -52,7 +55,7 @@ export const convertToothNumber = (originalNumber: string, isFromAPI: boolean = 
     return `${newQuadrant}-${number}`;
   }
 
-  // 手动修改时，如果编号已经是正确的（如 1-7），直接返回
+  // 手动��改时，如果编号已经是正确的（如 1-7），直接返回
   if (quadrant === '1' || quadrant === '2' || quadrant === '3' || quadrant === '4') {
     return originalNumber;
   }
@@ -93,7 +96,7 @@ const DiseaseTag = ({
   </span>
 );
 
-// 添加确认对话框组件
+// 添加确认�����������������话框组件
 const ConfirmDialog = ({ 
   open, 
   onOpenChange, 
@@ -141,7 +144,7 @@ const DeleteConfirmDialog = ({
   <Dialog open={open} onOpenChange={onOpenChange}>
     <DialogContent className="sm:max-w-[425px]">
       <DialogHeader>
-        <DialogTitle>フォルダを削除しますか？</DialogTitle>
+        <DialogTitle>フォルダを削除����す����</DialogTitle>
       </DialogHeader>
       <div className="flex justify-end gap-4 mt-4">
         <button
@@ -167,9 +170,6 @@ interface DatabaseImage {
   uploadTime: string;
   annotations?: Box[];  // 添加标注字段
 }
-
-// 修改所有API请求的URL
-const API_BASE_URL = 'http://localhost:3002';  // 使用新的后端端口
 
 export function ImageGrid() {
   const [annotations, setAnnotations] = useState<Box[]>([]);
@@ -208,23 +208,51 @@ export function ImageGrid() {
   const [databaseImages, setDatabaseImages] = useState<DatabaseImage[]>([]);
   const [loadingImageId, setLoadingImageId] = useState<string | null>(null);  // 添加新状态来跟踪正在加载的图片
 
+  const [currentImageId, setCurrentImageId] = useState<string | null>(null);
+
   const fetchDatabaseImages = async () => {
     try {
-      console.log('Fetching images at:', new Date().toISOString());
-      console.log('For patient ID:', id);
-      const response = await fetch(`${API_BASE_URL}/api/patients/${id}/images`);
+      console.log('Using API URL:', API_BASE_URL);  // 添加日志
+      const url = `${API_BASE_URL}/api/patients/${id}/images`;
+      console.log('Fetching images from:', url);
+      
+      const response = await fetch(url);
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
       const data = await response.json();
-      console.log('Received images:', data);
+      console.log('Received data:', data);
+      
       setDatabaseImages(data);
     } catch (error) {
       console.error('Error fetching images:', error);
     }
   };
 
+  // 添加健康检查函数
+  const checkServerHealth = async () => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/health`);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const data = await response.json();
+      console.log('Server health check:', data);
+      return true;
+    } catch (error) {
+      console.error('Server health check failed:', error);
+      return false;
+    }
+  };
+
   useEffect(() => {
+    // 在组件加载时检查服务器状态
+    checkServerHealth().then(isHealthy => {
+      if (!isHealthy) {
+        console.error('Backend server is not responding');
+      }
+    });
+
     if (id) {
       fetchDatabaseImages();
     }
@@ -347,7 +375,7 @@ export function ImageGrid() {
         if (predictionResponse.ok) {
           const predictionResult = await predictionResponse.json();
 
-          // 保存图片和预测结果到后端
+          // 保存图片和预测结果���后端
           const saveFormData = new FormData();
           saveFormData.append('image', file);
           saveFormData.append('annotations', JSON.stringify(predictionResult.boxes));
@@ -360,20 +388,14 @@ export function ImageGrid() {
           if (saveResponse.ok) {
             const saveResult = await saveResponse.json();
             
-            // 直接使用保存到S3的URL，而不是创建本地URL
-            const newImage = {
-              id: saveResult.imageId,
-              url: saveResult.url,  // 使用S3的URL
-              uploadTime: new Date().toISOString().split('T')[0],
-              annotations: predictionResult.boxes,
-              originalUrl: saveResult.url  // 使用相同的URL
-            };
-
-            // 更新本地状态
+            // 确保使用代理URL
+            const imageUrl = `/api/images/proxy/${saveResult.imageId}`;
+            
+            // 更新数据库片列表
             setDatabaseImages(prev => [...prev, {
               id: saveResult.imageId,
-              url: saveResult.url,
-              uploadTime: newImage.uploadTime,
+              url: `${API_BASE_URL}${imageUrl}`,  // 使用代理URL
+              uploadTime: new Date().toISOString().split('T')[0],
               annotations: predictionResult.boxes
             }]);
           }
@@ -454,7 +476,7 @@ export function ImageGrid() {
           const newAnnotations = [...prev];
           newAnnotations[existingIndex] = {
             ...existingAnnotation,
-            disease_type: ['Normal'],  // 使用组格式，保持一致性
+            disease_type: ['Normal'],  // 使用组格式，保���一致性
             name: toothNumber,  // 只保留编号
             source: 'Manual' as const
           };
@@ -464,7 +486,7 @@ export function ImageGrid() {
           return newAnnotations.filter(a => a.disease_type[0] !== 'Normal');  // 过滤掉健康齿
         }
 
-        // 无论是添加还是修改，都在同一个条目上作
+        // 无论��添加还是修改，都在同一个条目上作
         const currentDiseases = Array.isArray(existingAnnotation.disease_type)
           ? existingAnnotation.disease_type
           : [existingAnnotation.disease_type];
@@ -489,9 +511,9 @@ export function ImageGrid() {
         return newAnnotations;
       }
 
-      // 有在找不到现有条目时才新增
+      // 有在找不到现有条目时才���增
       const newAnnotation: Box = {
-        tooth_number: toothNumber,  // 直接使用入的编号
+        tooth_number: toothNumber,  // 直接使用��的编号
         disease_type: [diseaseType],
         probability: 1.0,
         name: `${toothNumber} - ${DISEASE_TYPE_MAP[diseaseType]}`,
@@ -503,20 +525,50 @@ export function ImageGrid() {
     checkChanges(annotations, memo);
   };
 
-  const handleConfirmSave = () => {
-    setSavedAnnotations(annotations);
-    // 更新 uploadedImages 中的标注数据
-    setUploadedImages(prev => prev.map(img => {
-      if (img.originalUrl === originalImageUrl) {
-        return {
-          ...img,
-          annotations: annotations  // 使用最新的标注数据
-        };
+  const handleConfirmSave = async () => {
+    try {
+      if (!currentImageId) {
+        throw new Error('No image selected');
       }
-      return img;
-    }));
-    setConfirmDialogOpen(false);
-    setDialogOpen(false);
+
+      console.log('Saving annotations for image:', {
+        imageId: currentImageId,
+        annotationsCount: annotations.length,
+        annotations: annotations
+      });
+
+      // 保存到数据库
+      const response = await fetch(`${API_BASE_URL}/api/images/${currentImageId}/annotations`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ annotations }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to save annotations');
+      }
+
+      const data = await response.json();
+      console.log('Server response:', data);
+
+      // 更新本地状态
+      setDatabaseImages(prev => prev.map(img => 
+        img.id === currentImageId
+          ? { ...img, annotations }
+          : img
+      ));
+      setSavedAnnotations(annotations);
+      setConfirmDialogOpen(false);
+      setDialogOpen(false);
+      setHasChanges(false);
+
+    } catch (error) {
+      console.error('Error saving annotations:', error);
+      alert(`保存に失敗しました: ${(error as Error).message}`);
+    }
   };
 
   const handleConfirmCancel = () => {
@@ -597,18 +649,25 @@ export function ImageGrid() {
   const handleDatabaseImagePredict = async (image: DatabaseImage) => {
     try {
       setLoadingImageId(image.id);
+      setCurrentImageId(image.id);  // 设置当前图片ID
+
+      console.log('Processing image:', {
+        id: image.id,
+        url: image.url,
+        annotations: image.annotations
+      });
 
       // 如果已经有预测结果，直接使用
       if (image.annotations) {
         setAnnotations(image.annotations);
         setPredictedAnnotations(image.annotations);
-        setOriginalImageUrl(image.url);
+        setOriginalImageUrl(image.url.startsWith('/') ? `${API_BASE_URL}${image.url}` : image.url);
         setDialogOpen(true);
         return;
       }
 
-      // 先获取图像文件
-      const response = await fetch(image.url);
+      // 获取图像文件时使用完整URL
+      const response = await fetch(image.url.startsWith('/') ? `${API_BASE_URL}${image.url}` : image.url);
       const blob = await response.blob();
       const file = new File([blob], 'image.jpg', { type: 'image/jpeg' });
 
@@ -624,23 +683,23 @@ export function ImageGrid() {
         const predictionResult = await predictionResponse.json();
         const newAnnotations = predictionResult.boxes;
 
-        // 更新数据库图片的预测结果
         setDatabaseImages(prev => prev.map(img => 
           img.id === image.id 
             ? { ...img, annotations: newAnnotations }
             : img
         ));
 
-        // 设置预测结果并开对话框
         setAnnotations(newAnnotations);
         setPredictedAnnotations(newAnnotations);
-        setOriginalImageUrl(image.url);
+        // 这里也要修改
+        setOriginalImageUrl(image.url.startsWith('/') ? `${API_BASE_URL}${image.url}` : image.url);
         setDialogOpen(true);
       }
     } catch (error) {
       console.error('Error predicting database image:', error);
       setAnnotations([]);
       setPredictedAnnotations([]);
+      setCurrentImageId(null);
     } finally {
       setLoadingImageId(null);
     }
@@ -744,7 +803,7 @@ export function ImageGrid() {
             >
               <ImageBox
                 image={null}
-                originalImageUrl={image.originalUrl}
+                originalImageUrl={image.originalUrl.startsWith('/') ? `${API_BASE_URL}${image.originalUrl}` : image.originalUrl}
                 annotations={image.annotations}
                 onUpload={() => {}}
                 clickable={false}
@@ -768,6 +827,9 @@ export function ImageGrid() {
         <DialogContent className="max-w-[80vw] w-[80vw] max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>データアラート検出</DialogTitle>
+            <div className="sr-only">
+              歯科画像の分析結果��表示します
+            </div>
           </DialogHeader>
           <div className="flex flex-col gap-6">
             {/* 第一行：图片和齿位图 - 修改列宽比例 */}
@@ -802,7 +864,7 @@ export function ImageGrid() {
                     />
                   )}
                 </div>
-                {/* 上层标注 */}
+                {/* ���层标注 */}
                 <canvas
                   ref={annotationCanvasRef}
                   style={{
