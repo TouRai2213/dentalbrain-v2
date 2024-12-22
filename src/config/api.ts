@@ -1,1 +1,1 @@
-export const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://v2.dentalbrain.app';
+export const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://192.168.50.152:3002';

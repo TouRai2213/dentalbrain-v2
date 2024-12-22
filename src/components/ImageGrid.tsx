@@ -828,7 +828,7 @@ export function ImageGrid() {
           <DialogHeader>
             <DialogTitle>データアラート検出</DialogTitle>
             <div className="sr-only">
-              歯科画像の分析結果��表示します
+              歯科画像の分析結果を表示します
             </div>
           </DialogHeader>
           <div className="flex flex-col gap-6">

@@ -21,11 +21,13 @@ export function PatientDetail() {
   useEffect(() => {
     const fetchPatientDetails = async () => {
       try {
+        console.log('Fetching patient details from:', `${API_BASE_URL}/api/patients/${id}`);
         const response = await fetch(`${API_BASE_URL}/api/patients/${id}`);
         if (!response.ok) {
-          throw new Error('Patient not found');
+          throw new Error(`HTTP error! status: ${response.status}`);
         }
         const data = await response.json();
+        console.log('Received patient details:', data);
         setPatient(data);
       } catch (error) {
         console.error('Error fetching patient:', error);
@@ -63,7 +65,16 @@ export function PatientDetail() {
       case 'gallery':
         return <ImageGrid />;
       case 'subchart':
-        return <SubChart />;
+        return patient ? (
+          <SubChart
+            patientId={patient.id}
+            patientName={patient.name}
+            patientNameKana={patient.nameKana}
+            chartNumber={patient.chartNumber}
+            birthDate={patient.birthDate}
+            gender={patient.gender}
+          />
+        ) : null;
       default:
         return null;
     }

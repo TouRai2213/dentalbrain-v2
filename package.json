@@ -10,6 +10,8 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@excalidraw/excalidraw": "^0.17.6",
+    "@headlessui/react": "^2.2.0",
     "@radix-ui/react-dialog": "^1.1.2",
     "aws-sdk": "^2.1692.0",
     "date-fns": "^3.6.0",

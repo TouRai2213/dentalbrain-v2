@@ -2,7 +2,7 @@ module.exports = {
     apps: [
       {
         name: 'dental-frontend',
-        cwd: '/home/tourai2213/dentalbrain-v2',
+        cwd: '/',
         script: 'npm',
         args: 'run dev -- --host',
         env: {
@@ -12,8 +12,8 @@ module.exports = {
         watch: false,
         ignore_watch: ['node_modules', 'logs'],
         max_memory_restart: '1G',
-        error_file: '/home/tourai2213/dentalbrain-v2/logs/frontend-error.log',
-        out_file: '/home/tourai2213/dentalbrain-v2/logs/frontend-out.log',
+        error_file: './logs/frontend-error.log',
+        out_file: './logs/frontend-out.log',
         log_date_format: 'YYYY-MM-DD HH:mm:ss',
         autorestart: true,
         exp_backoff_restart_delay: 100,
@@ -23,7 +23,7 @@ module.exports = {
       },
       {
         name: 'dental-backend',
-        cwd: '/home/tourai2213/dentalbrain-v2/backend',
+        cwd: '/backend',
         script: 'server.js',
         env: {
           NODE_ENV: 'production',
@@ -32,8 +32,8 @@ module.exports = {
         watch: ['server.js', 'src'],
         ignore_watch: ['node_modules', 'logs'],
         max_memory_restart: '1G',
-        error_file: '/home/tourai2213/dentalbrain-v2/backend/logs/error.log',
-        out_file: '/home/tourai2213/dentalbrain-v2/backend/logs/out.log',
+        error_file: './backend/logs/error.log',
+        out_file: './backend/logs/out.log',
         log_date_format: 'YYYY-MM-DD HH:mm:ss',
         autorestart: true,
         exp_backoff_restart_delay: 100,

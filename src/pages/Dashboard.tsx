@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Tag, UserPlus } from 'lucide-react';
 import { NewPatientModal } from '../components/modals/NewPatientModal';
 import { Patient } from '../types/patient';
 import { API_BASE_URL } from '../config/api';
 
 export function Dashboard() {
+  const navigate = useNavigate();
   const [isNewPatientModalOpen, setIsNewPatientModalOpen] = useState(false);
   const [patients, setPatients] = useState<Patient[]>([]);
   const [loading, setLoading] = useState(true);
@@ -16,8 +17,13 @@ export function Dashboard() {
 
   const fetchPatients = async () => {
     try {
+      console.log('Fetching patients from:', `${API_BASE_URL}/api/patients`);
       const response = await fetch(`${API_BASE_URL}/api/patients`);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
       const data = await response.json();
+      console.log('Received patients:', data);
       setPatients(data);
     } catch (error) {
       console.error('Error fetching patients:', error);
@@ -75,7 +81,7 @@ export function Dashboard() {
               <tr
                 key={patient.id}
                 className="hover:bg-gray-50 cursor-pointer"
-                onClick={() => window.location.href = `/patients/${patient.id}`}
+                onClick={() => navigate(`/patients/${patient.id}`)}
               >
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                   {patient.chartNumber}

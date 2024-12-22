@@ -2,10 +2,13 @@ export interface Patient {
   id: string;
   chartNumber: string;
   name: string;
+  nameKana?: string;
   lastUpdate: string;
   status: string;
   doctor: string;
   symptom: string;
+  birthDate?: string;
+  gender?: string;
   diagnosis?: string;
   medicalRecords: MedicalRecord[];
 }

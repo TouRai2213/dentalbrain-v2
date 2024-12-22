@@ -27,3 +27,4 @@ dist-ssr
 **/.env.development
 **/.env.production
 *.sql
++ src/config/api.ts

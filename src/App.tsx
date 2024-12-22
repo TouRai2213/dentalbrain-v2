@@ -6,6 +6,7 @@ import { PatientDetail } from './pages/PatientDetail';
 import { AlertDetection } from './pages/AlertDetection';
 import { ImageProvider } from './context/ImageContext';
 import { Appointments } from './pages/Appointments';
+import { SubChartEditor } from './pages/SubChartEditor';
 
 function App() {
 
@@ -38,6 +39,7 @@ function App() {
             }
           />
           <Route path="/alert-detection" element={<AlertDetection />} />
+          <Route path="/subchart-editor/:id" element={<SubChartEditor />} />
         </Routes>
       </ImageProvider>
     </BrowserRouter>

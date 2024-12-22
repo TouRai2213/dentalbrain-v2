@@ -58,7 +58,9 @@ app.use(cors({
   origin: [
     'https://v2.dentalbrain.app',
     'http://localhost:5174',
-    'http://localhost:3002'
+    'http://localhost:3002',
+    'http://192.168.50.152:5174',  // 添加你的局域网前端地址
+    /^http:\/\/192\.168\.\d+\.\d+:5174$/  // 或者使用正则表达式匹配所有局域网地址
   ],
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   credentials: true,
@@ -119,7 +121,7 @@ process.on('unhandledRejection', (reason, promise) => {
   process.stdout.write(`Reason: ${reason}\n`);
 });
 
-// 2. 图片相关的路由组 - 移到最前面
+// 2. 图相关的路由组 - 移到最前面
 // 更新图片标注
 app.put('/api/images/:imageId/annotations', async (req, res) => {
   console.log('=== Annotation Update Process Started ===');
@@ -275,6 +277,8 @@ app.delete('/api/images/:imageId', async (req, res) => {
 
 // 修改代理图片的路由
 app.get('/api/images/proxy/:imageId', async (req, res) => {
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
   try {
     console.log(`\n=== Proxying image ${req.params.imageId} ===`);
     
@@ -374,7 +378,7 @@ app.use((err, req, res, next) => {
   });
 });
 
-// 在服务器启动时打印配置（注意不要在生产环境打印敏感信息）
+// 在服务器启动时打印配置（注意不在生产环境打印敏感信息）
 console.log('AWS Configuration:', {
   bucket: process.env.AWS_BUCKET_NAME,
   region: process.env.AWS_REGION,
@@ -446,9 +450,13 @@ app.get('/api/patients/:id', async (req, res) => {
         k.kanri_no,
         k.name,
         k.name2,
+        k.kana,
+        k.kana2,
         DATE_FORMAT(k.updated_at, '%Y-%m-%d') as updated_date,
         m.name as status_name,
-        k.tanto_name
+        k.tanto_name,
+        k.birthday,
+        k.sex
       FROM t_kanja k
       LEFT JOIN m_chiryo_jotai m ON k.status = m.code
       WHERE k.kanri_no = ? AND k.kaiin_code = ${TEST_KAIIN_CODE}
@@ -462,11 +470,13 @@ app.get('/api/patients/:id', async (req, res) => {
       id: rows[0].kanri_no,
       chartNumber: rows[0].kanri_no,
       name: `${rows[0].name}${rows[0].name2 || ''}`,
+      nameKana: `${rows[0].kana || ''}${rows[0].kana2 || ''}`,
       lastUpdate: rows[0].updated_date,
       status: rows[0].status_name || '未設定',
       doctor: rows[0].tanto_name,
-      symptom: '',
-      medicalRecords: []
+      birthDate: rows[0].birthday,
+      gender: rows[0].sex === '1' ? 'male' : 'female',
+      symptom: ''
     };
 
     res.json(patient);
@@ -601,7 +611,7 @@ app.post('/api/patients/:id/images', upload.single('image'), async (req, res) =>
   }
 });
 
-// 添加S3上传测试
+// 添加S3传测试
 app.get('/api/test-s3', async (req, res) => {
   try {
     // 测试上传小文件
